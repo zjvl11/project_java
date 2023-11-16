@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}"
+	lang="ko-kr">
+<head>
+<meta charset="UTF-8">
+<title>welcome</title>
+<!--  10.17 -->
+<style>
+	#myPage {
+		height:100%;
+		display:flex;
+		align-items:center;
+		justify-content:center;
+	}
+</style>
+
+<!-- 10.17 -->
+<!-- bootstrap icons :  -->
+<link rel="stylesheet" th:href="@{/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css}">
+</head>
+<body>
+
+	<!-- layout -->
+	<div layout:fragment="content" class="main_sect_pnl">
+	
+		<div id="myPage" class="content_sect_pnl" style="font-size:1.2em">
+	
+			<!-- principal :
+			<span th:text="${#authentication}"></span>
+			<br>
+			<hr> -->
+
+			<!-- 10.17 -->			
+			<!-- <span th:text="${#authentication.authorities.size()}"></span> -->
+			
+			<span th:if="${#authentication.authorities.size() == 1  AND #authentication.authorities[0].role == 'ROLE_USER'}">
+				<i class="bi bi-person"></i> 회원
+			</span>
+			
+			<span th:if="${#authentication.authorities.size() == 2 AND #authentication.authorities[1].role == 'ROLE_ADMIN'}">
+				<i class="bi bi-person-add"></i>
+				관리자
+			</span>
+			&nbsp;
+		
+			<b><span th:text="${#authentication.name}"></span></b>
+			 님 입장하셨습니다&nbsp;&nbsp;
+			 
+			<a class="btn btn-primary" th:href="@{'/logout'}">로그아웃</a>
+		
+		</div>
+
+	</div> <!-- // layout -->
+	
+</body>
+</html>

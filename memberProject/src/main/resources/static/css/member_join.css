@@ -1,0 +1,114 @@
+@charset "UTF-8"
+
+/* 공통 CSS */    
+* {
+    font-size:1em;
+}
+
+/* 회원 가입 타이틀 */
+h2 {
+    font-size:2em;
+    text-indent:1em;
+}
+
+/* 회원 가입 전체 패널 */
+#form_content_pnl {
+    margin:auto;
+    width:800px;
+    /* background-color:orange; */
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+}
+
+/* 각종 필드 패널 */ 
+[id$=fld_pnl] {
+    width:800px;
+    height:80px;
+    display:flex;
+    flex-direction:row;      
+}
+
+/* 각 필드들의 라벨 */    
+.fld_label {
+    width:150px;
+    height:80px;
+    font-size:1.2em;        
+    font-weight:bold;
+    /* background:yellow; */
+    display:flex;
+    align-items:center;
+    text-indent:20px;
+}
+
+ /* 각 필드들의 내용 패널 */    
+ div.fld_content {
+    width:650px;
+    height:80px;
+    /* background:cyan;  */
+    display:flex;
+    align-items:center;
+    flex-direction:row;        
+}
+
+/* 각 필드들의 내용 패널 */    
+.fld_content input[type=text], 
+.fld_content input[type=password],
+.fld_content input[type=email] {
+    /* width:50%; */
+    height:30px;
+    background:#fff; 
+    border:2px solid #ccc;
+    margin-right:1em;
+}
+
+/* 각 필드들 hover 상태 */ 
+.fld_content input[type=text]:hover, 
+.fld_content input[type=password]:hover,
+.fld_content input[type=email]:hover {
+    height:30px;
+    background:#fff; 
+    border:4px solid #999;
+    margin-right:1em;
+}
+
+/* 라디오 버튼 필드 */
+input[type=radio] {
+    width:25px;
+    height:25px;
+}
+
+/* 라디오 버튼 필드 라벨 */
+#gender_fld_pnl div.fld_content div:nth-child(2n) {
+    width:25px;
+    height:25px;
+    padding:0 10px;
+    /* background-color:#0080ff; */
+}
+
+/* 각종 버튼 필드 */
+[id$=_btn] {
+    width:100px;
+    height:40px;
+    background-color:#0080ff;
+    border:0px;
+    color:#fff;
+    border-radius:7px;        
+    margin-right:10px;
+}
+
+/* 최하단 전송/취소 필드 패널 */
+#buttons_fld_pnl {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+/* 각종 필드들의 에러 패널*/
+[id$=fld_err_pnl] {
+    width:800px;
+    /* height:50px; */
+    /* background:lightgray; */
+    text-indent:150px;
+    color:red;
+}

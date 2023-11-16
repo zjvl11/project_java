@@ -1,0 +1,115 @@
+@charset "UTF-8";
+
+/* 
+    전체 로그인 패널 박스(login_box) 
+
+    1) 너비 : 350픽셀
+    2) 높이 : 280픽셀 (실제 높이 300픽셀 : 상단 내부간격 포함)
+    3) 정렬 : 중앙정렬
+    4) 내부간격(상단) : 20픽셀
+    5) 배경 : 단색(선택)
+    6) 글꼴 종류 : 나눔 고딕
+
+    - 색상 리스트 : https://www.w3schools.com/colors/colors_names.asp
+
+    참고로 색상 RGB 코드와 RGB 코드 16진수->10진수 변환기는
+    아래의 링크를 참고합니다.
+    참고링크 : http://www.binaryhexconverter.com/hex-to-decimal-converter
+
+*/
+#login_box 
+{  
+    width:350px;
+    height:280px;
+    text-align:center;
+    padding-top:20px;
+        
+    font-family:Nanum Gothic;
+}  
+
+/* 
+    로그인/회원가입 버튼
+    
+    1) 너비 : 360픽셀
+    2) 높이 : 60픽셀
+    3) 배경색 : #1E90FF(DodgerBlue);
+    4) 테두리 : 두께(2px) 실선 #00BFFF(DeepSkyBlue)
+    5) 글꼴크기 : 15포인트
+    6) 글자간 간격 : 0.1 em
+    7) 글꼴색 : 흰색
+    8) 내부 간격(하단) : 7px;
+    9) 모서리 라운드 처리 : 5px;
+    10) 마진 : 2px 0 (상하 좌우);
+*/
+input#join_btn, input#login_btn 
+{
+    width:360px;
+    height:60px;
+    background-color:#1E90FF;
+    border: 2px solid #00BFFF;
+    font-size:15pt;
+    letter-spacing:0.1em;			
+    color:#fff;
+
+    padding-bottom:7px;
+    border-radius:5px;
+    margin:2px 0;
+}
+
+/* 
+    아이디/패쓰워드 필드 박스
+    
+    1) 외부 간격 : 상하 5px
+*/
+div#id_box, div#pw_box 
+{
+    margin:5px 0;	
+}
+
+/* 
+    아이디/패쓰워드 필드 
+    
+    1) 너비 : 350픽셀
+    2) 높이 : 50픽셀
+    3) 글꼴크기 : 15포인트
+    4) 테두리 : 두께 2픽셀 실선 #1E90FF(DodgerBlue)
+    5) 들여쓰기 : 1em
+    6) 글꼴색 : #000(black)
+*/
+input#username, input#password  
+{
+    width:350px;
+    height:50px;
+    font-size:15pt;
+    border:3px solid #1E90FF;		
+    text-indent:1em;
+    color:#000;
+}
+
+/*
+    아이디/패쓰워드 필드 미리보기(placeholder)
+
+    1) 글자색 : #1E90FF(DodgerBlue)
+    2) 투명도 : 0.7
+
+    참고) 아래의 ::placeholder CSS3 규정은 IE에서는 지원되지 않습니다. Edge에서는 지원됩니다.
+    참고 링크) https://caniuse.com/#search=%3A%3Aplaceholder
+*/
+input::placeholder {
+    color:#1E90FF; 
+    opacity:0.7;
+}
+
+/* 
+    각종 필드들의 에러 패널
+
+    1) 너비 : 350픽셀
+    2) 글꼴색 : red
+    3) 줄바꿈 처리 : 자동 줄바꿈(개행)
+
+*/
+[id$=fld_err_pnl] {
+    width:350px;
+    color:red;
+    word-wrap:break-all;
+}

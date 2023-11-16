@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  layout:decorate="~{layout}"
+ 	  lang="ko-kr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>login box</title>
+
+<style>
+@import url(http://fonts.googleapis.com/earlyaccess/nanumgothic.css);
+</style>
+
+<link th:href="@{'/css/login.css'}" rel="stylesheet" />
+
+</head>
+<body>
+
+	<!-- layout -->
+	<div layout:fragment="content" class="main_sect_pnl">
+
+		<script th:inline="javascript" th:if="${error == 'true'}">
+	 	<!--
+			alert([[${msg.message}]]);
+	 	//-->
+		</script>
+
+		<!-- 1. 로그인 박스 시작 -->
+		<div id="login_box">
+
+			<form id="login_frm" method="post" th:action="@{'/login'}">
+
+				<!-- 2. 아이디 필드 섹션 시작 -->
+				<div id="id_box">
+
+					<!-- 
+               2. 아이디 필드 작성 조건
+           
+               1) 타입 : 텍스트
+               2) id : id
+               3) name : id
+               4) 크기 : 30
+               5) 최대 입력 글자수 : 20
+               6) 내부 라벨(초기값) : 아이디
+           -->
+
+					<input type="text" id="username" name="username" size="30"
+						maxlength="20" placeholder="아이디">
+
+					<!-- 아이디 에러 메시징 -->
+					<div id="id_fld_err_pnl"></div>
+
+				</div>
+				<!-- 2. 아이디 필드 섹션 끝 -->
+
+				<!-- 3. 패쓰워드 필드 섹션 시작 -->
+				<div id="pw_box">
+
+					<!-- 
+               3. 패쓰워드 필드 작성 조건
+           
+               1) 타입 : 패쓰워드
+               2) id : password
+               3) name : password
+               4) 크기 : 30
+               5) 최대 입력 글자수 : 20
+               6) 내부 라벨(초기값) : 패쓰워드
+           -->
+					<!-- <input type="password" id="password" name="password" size="30" maxlength="20" placeholder="패쓰워드"> -->
+					<input type="text" id="password" name="password" size="30"
+						maxlength="20" placeholder="패쓰워드">
+
+					<!-- 패쓰워드 에러 메시징 -->
+					<div id="password_fld_err_pnl"></div>
+
+				</div>
+				<!-- 3. 패쓰워드 필드 섹션 끝 -->
+
+				<!-- 4. 전송 버튼 필드 섹션 시작 -->
+				<div id="submit_box">
+
+					<!-- 
+               4. 전송 버튼
+
+               1) 타입 : 전송
+               2) id : submit_btn
+               3) 내부 라벨 : 로그인
+           -->
+					<input type="submit" id="login_btn" value="로그인">
+					
+				</div>
+				<!-- 4. 전송 버튼 필드 섹션 끝 -->
+
+				<!-- 5. 전송 버튼 필드 섹션 시작 -->
+				<div id="join_box">
+
+					<!-- 
+               5. 회원가입 버튼
+
+               1) 타입 : 버튼
+               2) id : join_btn
+               3) 내부 라벨 : 회원가입
+           -->
+					<!-- 10.17 : 회원 가입 링크 -->
+					<input type="button" id="join_btn" value="회원가입" 
+						   onclick="location.href='/memberProject/member/join.do'"/>
+				</div>
+				<!-- 5. 전송 버튼 필드 섹션 끝 -->
+
+			</form>
+
+		</div>
+		<!-- 1. 로그인 박스 끝 -->
+			
+</div> <!--// layout -->
+ 
+</body>
+</html>

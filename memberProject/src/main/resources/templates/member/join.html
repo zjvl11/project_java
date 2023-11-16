@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<!-- 10.17 : thymeleaf dialect 적용 -->
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  layout:decorate="~{layout}"
+ 	  lang="ko-kr"> 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    
+    <link th:href="@{/css/member_join.css}" rel="stylesheet" />
+    
+    <!-- 9.27 : AJAX library axios -->
+    <script th:src="@{'/axios/1.5.0/dist/axios.min.js'}"></script>
+
+    <!-- 8.4 : 주소 검색 서비스 -->
+
+    <!-- 1단계 : daum 우편번호 서비스 외장 JS(Javascript) 파일 링크 -->
+    <!-- 주의사항) 주소 검색 서비스는 일반적으로 서버(가령 live 서버) 없이 
+         실행시 오류가 발생할 수 있기 때문에 반드시 서버가 있는 상황에서 실행시키시기 바랍니다. -->
+    <script src="http://dmaps.daum.net/map_js_init/postcode.v2.js"></script>
+
+    <!-- 2단계 : 소스 코드 복사 
+        // javateacher) 본 회원가입 코드에서는 도로명으로 선택하든 지번 주소로 선택하든
+        // 일괄적으로 도로명으로 기본주소가 들어가도록 설정하였습니다. 추후 지번 주소와
+        // 같이 송부하기 위해서는 아래의 코드를 약간 변경하여 지번주소가 들어갈 필드를 
+        // 추가하시면 되겠습니다. -->
+    <script th:src="@{'/js/member_join.js'}" charset="UTF-8"></script>
+    
+    <!-- 메시징 -->
+    <script th:inline="javascript" th:if="${msg != null}">
+		alert([[${msg}]]);
+	</script>
+</head>
+<body>
+
+	<!-- 10.17 : layout -->
+	<div layout:fragment="content" class="main_sect_pnl">
+	
+		<div class="content_sect_pnl">
+	
+		    <!-- 회원 가입 -->
+		    <div id="form_content_pnl">
+		        
+		        <h2>회원 가입</h2>
+		    
+		        <div id="form_content_box">
+		
+		            <!-- 7.27 : id(frm) 할당 -->
+		            <!-- 7.27 : HTML 폼 점검 기능 해제 : novalidate 속성 기입 -->
+		            
+		            <!-- <form id="frm" action="#" method="post" autocomplete="off"> -->
+		            <!-- 8.8 : 인자 전송 육간 확인 위한 method="get" 임시 조치 -->    
+		            <form id="frm" th:action="@{'/member/joinProc.do'}" method="post" autocomplete="off" th:object="${memberDTO}">
+		                    
+		                <!-- 회원 아이디-->	
+		                <div id="id_fld_pnl">	
+		                    <div class="fld_label">
+		                        <label for="id">아이디</label>
+		                    </div>
+		                    <div class="fld_content">
+		                        <!-- <input type="text" id="id" name="id"                               
+		                               maxlength="20"
+		                               required pattern="[a-zA-Z]{1}\w{7,19}"
+		                               title="회원 아이디는 8~20사이의 영문으로 시작하여 영문 대소문자/숫자로 입력하십시오." /> -->
+		                        <input type="text" id="id" name="id" maxlength="20" th:field="*{id}" />       
+		                    </div>							
+		                </div>						
+		                
+		                <!-- 회원 아이디 에러 메시징 -->
+		                <div id="id_fld_err_pnl">
+		                </div>
+		                <!--// 회원 아이디-->
+		                
+		                <!-- 회원 패쓰워드 -->	
+		                <div id="pw_fld_pnl">	
+		                    <div class="fld_label">
+		                        <label for="password">패쓰워드</label>
+		                    </div>
+		                    <div class="fld_content">
+		                        <!-- <input type="password" id="password" name="password" title="" /> -->
+		                        <!-- 7.27 : 입력 필드값 확인 임시 조치, maxlength -->
+		                        <input type="text" id="password" name="password" maxlength="20" th:field="*{password}" />
+		                    </div>
+		                </div>
+		                
+		                <!-- 회원 패쓰워드 에러 메시징 -->
+		                <div id="password_fld_err_pnl">
+		                </div>
+		                <!--// 회원 패쓰워드 -->
+		                
+		                <!-- 회원  이름-->
+		                <!-- 7.31 : 이름 용례 추가 -->	
+		                <div id="name_fld_pnl">	
+		                    <div class="fld_label">
+		                        <label for="name">이름</label>
+		                    </div>
+		                    <div class="fld_content">
+		                        <input type="text" id="name" name="name" th:field="*{name}" />&nbsp;
+		                        ex) 홍 길동, 남궁 민수
+		                    </div>    
+		                </div>
+		            
+		                <!-- 회원 이름 에러 메시징 -->
+		                <div id="name_fld_err_pnl">
+		                </div>
+		                <!--// 회원 이름 -->
+		                
+		                <!-- 회원  성별 -->	
+		                <div id="gender_fld_pnl">	
+		                    <div class="fld_label">
+		                    	<!--  9.27 교정 -->
+		                        <!-- <label for="gender"> -->
+		                        <label>성별</label>
+		                    </div>
+		                    <div class="fld_content">                        
+		                        <div><input type="radio" id="radio1" name="gender" value="m" th:field="*{gender}" /></div>
+		                        <div><label for="radio1">남</label></div>
+		                        <div>&nbsp;</div>                                
+		                        <div><input type="radio" id="radio2" name="gender" value="f" th:field="*{gender}"></div>
+		                        <div>&nbsp;</div>                     
+		                        <div><label for="radio2">여</label></div>
+		                    </div>
+		                </div>                     
+		                    
+		                <!-- 회원 성별 에러 메시징 -->
+		                <div id="gender_fld_err_pnl">
+		                </div>
+		                <!--// 회원 성별 -->
+		                    
+		                <!-- 회원  이메일 -->	
+		                <div id="email_fld_pnl">	
+		                    <div class="fld_label">
+		                        <label for="email">
+		                            이메일
+		                        </label>
+		                    </div>    
+		                    <div class="fld_content">
+		                        <input type="email" id="email" name="email" th:field="*{email}" />
+		                        ex) abcd@abcd.com
+		                    </div>
+		                </div>
+		                    
+		                <!-- 회원 이메일 에러 메시징 -->
+		                <div id="email_fld_err_pnl">
+		                </div>
+		                <!--// 회원 이메일 -->
+		                    
+		                <!-- 회원  연락처(휴대폰) -->	
+		                <div id="mobile_fld_pnl">	
+		                    <div class="fld_label">
+		                        <label for="mobile">휴대폰</label>
+		                    </div>
+		                    <div class="fld_content">
+		                        <input type="text" id="mobile" name="mobile" th:field="*{mobile}"/>
+		                        ex) 010-1234-5678
+		                    </div>    
+		                </div>                    
+		                
+		                <!-- 회원 연락처(휴대폰) 에러 메시징 -->
+		                <div id="mobile_fld_err_pnl">
+		                </div>
+		                <!--// 회원 연락처(휴대폰) -->
+		                
+		                <!-- 회원  연락처(집전화) -->	
+		                <div id="phone_fld_pnl">	
+		                    <div class="fld_label">
+		                        <label for="phone">집전화</label>
+		                    </div>
+		                    <div class="fld_content">
+		                        <input type="text" id="phone" name="phone" th:field="*{phone}"/>
+		                        ex) 02-1111-2222
+		                    </div>    
+		                </div>                    
+		                
+		                <!-- 회원  연락처(집전화) 에러 메시징 -->
+		                <div id="phone_fld_err_pnl">
+		                </div>
+		                <!--// 회원  연락처(집전화) -->
+		                    
+		                <!-- 회원  우편번호 -->	
+		                <div id="zip_fld_pnl">	
+		                    <div class="fld_label">
+		                        <label for="zip">우편번호</label>
+		                    </div>
+		                    <div class="fld_content">
+		                        <input type="text" id="zip" name="zip" style="width:100px;" readonly />
+		                        
+		                        <!-- 8.4 : 주소 검색 -->
+		                        <button type="button" id="address_search_btn" onclick="getPostcodeAddress()">주소 검색</button>
+		                        <button type="button" id="address_delete_btn">주소 삭제</button>
+		                    </div>                    
+		                </div>
+		                <!--// 회원 우편번호 -->
+		                    
+		                <!-- 회원  기본 주소 -->	
+		                <div id="address1_fld_pnl">	
+		                    <div class="fld_label">
+		                        <label for="address1">기본주소</label>
+		                    </div>
+		                    <div class="fld_content">
+		                        <input type="text" id="address1" name="address1" style="width:500px" readonly th:field="*{address1}" />
+		                    </div>
+		                </div>
+		                <!--// 회원 기본 주소 -->
+		                
+		                <!-- 회원 상세 주소 : address2 => detailAddress (변경) -->	
+		                <div id="address2_fld_pnl">	
+		                    <div class="fld_label">
+		                        <label for="address2">상세주소</label>
+		                    </div>    
+		                    <div class="fld_content">
+		                        <input type="text" id="address2" name="address2" style="width:400px" th:field="*{address2}" />
+		                    </div>
+		                </div>
+		                
+		                <!-- 회원 상세주소 에러 메시징 : 우편번호/기본주소 입력시 상세주소 미입력할 경우 -->
+		                <div id="address_fld_err_pnl">
+		                </div>
+		                <!--// 회원 상세주소 -->
+		                
+		                <!-- 회원  생일 -->	
+		                <div id="birthday_fld_pnl">	
+		                    <div class="fld_label">
+		                        <label for="birthday">생일</label>
+		                    </div>    
+		                    <div class="fld_content">
+		                        <!-- 8.7 : maxlength="10" 추가 -->
+		                        <input type="text" id="birthday" name="birthday" maxlength="10" />
+		                        <!-- 8.7 : 직접 입력시 예시 추가 -->
+		                        ex) 2000-01-01, 1999-12-10
+		                    </div>
+		                </div>
+		                
+		                <!-- 회원 생일 에러 메시징 -->
+		                <div id="birthday_fld_err_pnl">
+		                </div>
+		                <!--// 회원 생일 -->
+		                
+		                <!-- 회원  가입/취소 버튼 -->	
+		                <div id="buttons_fld_pnl">	
+		                    <button id="submit_btn" type="submit">회원 가입</button>&nbsp;
+		                    <button id="reset_btn" type="reset">취소</button>
+		                </div>
+		                <!--// 회원 가입/취소 버튼 -->
+		            
+		            </form>
+		
+		        </div>
+		    
+		    <!-- 10.17 : thymeleaf dialect -->    
+		    </div>
+		    <!-- content -->    
+	        
+	    </div>
+	    <!--// 회원 가입 -->
+    
+    </div>
+    <!--// layout -->
+    
+</body>
+</html>

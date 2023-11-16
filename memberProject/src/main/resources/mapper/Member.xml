@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.Member">
+
+	<!-- 회원 정보 생성 -->
+	<insert id="insertMember" parameterType="com.javateam.memberProject.domain.MemberDTO">
+		INSERT INTO member_tbl VALUES (
+		#{id},
+		#{password},
+		#{name},	
+		#{gender},
+		#{email},
+		#{mobile},
+		#{phone},
+		#{zip},
+		#{address1},
+		#{address2},
+		#{birthday},		
+		sysdate,
+		1)
+	</insert>
+	  
+	<!-- 회원 정보 롤(role) 생성 -->
+	<insert id="insertRole" parameterType="com.javateam.memberProject.domain.Role">
+		INSERT INTO user_roles VALUES (
+		user_roles_seq.nextval,
+		#{username},
+		#{role})
+	</insert>
+	
+	<!-- 아이디/이메일/휴대폰 존재여부(중복) 점검 -->
+	<select id="hasFld" parameterType="map" resultType="int">
+		SELECT count(*) FROM member_tbl WHERE ${fld} = #{val} 
+	</select> 
+	
+	<!-- 회원 정보 조회 -->
+	<select id="selectMember" parameterType="String"
+		    resultType="com.javateam.memberProject.domain.MemberDTO">
+		SELECT * FROM member_tbl WHERE id = #{id}
+	</select>
+	
+	<!-- 10.6 : 아이디/이메일/휴대폰 존재여부(중복) 점검 : 회원 정보 수정 -->
+	<select id="hasFldForUpdate" parameterType="map" resultType="int">
+		SELECT COUNT(*) FROM (
+		        SELECT ${fld} FROM member_tbl
+		        WHERE ID != #{id}
+		    )
+		WHERE ${fld} = #{val}
+	</select>
+	
+	<!-- 10.6 : 회원 정보 수정 -->
+	<!-- 10.16 : 동적 SQL 추가(조거/선택적 update)
+	     동적 SQL : https://mybatis.org/mybatis-3/ko/dynamic-sql.html#trim-where-set -->
+	<update id="updateMember" 
+			parameterType="com.javateam.memberProject.domain.MemberDTO">
+		UPDATE member_tbl
+		<set>
+			<if test="password != null">password = #{password},</if>
+			<if test="email != null">email = #{email},</if>
+			<if test="mobile != null">mobile = #{mobile},</if>
+			<if test="phone != null">phone = #{phone},</if>
+			<if test="zip != null">zip = #{zip},</if>
+			<if test="address1 != null">address1 = #{address1},</if>
+			<if test="address2 != null">address2 = #{address2}</if>
+		</set>
+		WHERE id = #{id}
+	</update>
+
+	<!-- 10.11 : 전체 회원 수 -->
+	<select id="selectMembersCount" resultType="int">
+		SELECT COUNT(*) FROM member_tbl
+	</select>
+	
+	<!-- 10.11 : 전체 회원 정보 조회 (페이징) -->
+	<select id="selectMembersByPaging" parameterType="map" 
+			resultType="com.javateam.memberProject.domain.MemberDTO">
+		SELECT *  
+		FROM (SELECT m.*,  
+		             FLOOR((ROWNUM - 1) / ${limit} + 1) page  
+		      FROM (
+		             SELECT *
+					 FROM member_tbl					 
+		             ORDER BY id DESC
+		           ) m  
+		      )  
+		WHERE page = #{page}
+	</select>
+	
+	<!-- 10.12 : 전체 회원 정보 조회 (페이징) : 아이디  중심 내림차순 정렬 -->
+	<select id="selectMembersWithRolesByPaging" parameterType="map" resultType="map">
+		SELECT *  
+		FROM (SELECT m.*,  
+		             FLOOR((ROWNUM - 1) / ${limit} + 1) page  
+		      FROM (
+			      	 SELECT 
+			      	 DISTINCT m.*,
+					 (
+					    SELECT LISTAGG(r2.role, ',') WITHIN GROUP (ORDER BY m2.id) 
+					    FROM member_tbl m2, user_roles r2  
+					    WHERE r2.username = m2.id
+					    AND r2.username = m.id
+					 ) AS "ROLE"           
+					 FROM member_tbl m, user_roles r
+					 WHERE m.id = r.username
+		             ORDER BY id DESC
+		          ) m  
+		      )  
+		WHERE page = #{page}
+	</select>
+	
+	<!-- 10.12 : 회원 롤 조회 -->
+	<select id="selectRolesById" parameterType="String" resultType="String">
+		SELECT role FROM user_roles WHERE username = #{id}
+	</select>
+	
+	<!-- 10.12 : 회원 롤 삭제 -->
+	<delete id="deleteRoleById" parameterType="map">
+		DELETE FROM user_roles 
+		WHERE username = #{id} AND role = #{role}
+	</delete>
+	
+	<!-- 10.16 : 회원 롤(들)삭제 -->
+	<delete id="deleteRolesById" parameterType="String">
+		DELETE FROM user_roles WHERE username = #{username}
+	</delete>
+	
+	<!--  10.16 : 회원 정보 삭제 -->
+	<delete id="deleteMemberById" parameterType="map">
+		DELETE FROM member_tbl WHERE id = #{id}
+	</delete>
+	
+	<!-- 10.13 : 검색 회원 정보 수 -->
+	<select id="selectMembersCountBySearching" parameterType="map" resultType="int">
+		SELECT COUNT(*) FROM member_tbl WHERE
+		<if test="searchKey == 'address'">
+			address1 like '%${searchWord}%'
+	   		OR address2 like '%${searchWord}%'
+  		</if>
+  		<if test="searchKey != 'address'">
+			${searchKey} like '%${searchWord}%'
+  		</if>
+	</select>
+	
+	<!-- 10.13 : 회원 정보 키워드 검색(조회) (페이징) : 아이디 중심 내림차순 정렬 -->
+	<select id="selectMembersWithRolesBySearching" parameterType="map" resultType="map">
+		SELECT *  
+		FROM (SELECT m.*,  
+		             FLOOR((ROWNUM - 1) / ${limit} + 1) page  
+		      FROM (
+			      	 SELECT 
+			      	 DISTINCT m.*,
+					 (
+					    SELECT LISTAGG(r2.role, ',') WITHIN GROUP (ORDER BY m2.id) 
+					    FROM member_tbl m2, user_roles r2  
+					    WHERE r2.username = m2.id
+					    AND r2.username = m.id
+					 ) AS "ROLE"           
+					 FROM member_tbl m, user_roles r
+					 WHERE m.id = r.username
+					 <if test="searchKey == 'address'">
+						 AND address1 like '%${searchWord}%'
+			    		 OR address2 like '%${searchWord}%'
+		    		 </if>
+		    		 <if test="searchKey != 'address'">
+						 AND ${searchKey} like '%${searchWord}%'
+		    		 </if>
+		             ORDER BY id DESC
+		          ) m  
+		      )  
+		WHERE page = #{page}
+	</select>
+	
+	<!-- 10.13 : 회원 활동/휴면  상태(enabled) 변경 -->
+	<update id="changeEnabled" parameterType="map">
+		UPDATE member_tbl SET enabled = #{enabled} 
+		WHERE id = #{id}
+	</update>
+	
+</mapper>

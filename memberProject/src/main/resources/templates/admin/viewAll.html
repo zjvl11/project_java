@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<!-- 10.17 : layout dialect 적용  -->
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}"
+	lang="ko-kr">
+<head>
+<meta charset="UTF-8">
+<title>관리자 화면</title>
+
+<!-- bootstrap -->
+<link rel="stylesheet"
+	th:href="@{/bootstrap/5.3.1/css/bootstrap.min.css}" />
+<script th:src="@{/bootstrap/5.3.1/js/bootstrap.min.js}" charset="UTF-8"></script>
+</head>
+<body>
+
+	<!-- layout -->
+	<div layout:fragment="content" class="main_sect_pnl">
+	
+		<div class="content_sect_pnl">
+
+			<!-- 
+			인자 현황판 (collapse) 
+			: https://getbootstrap.com/docs/5.3/components/collapse/ 
+		-->
+			<button class="btn btn-primary" data-bs-toggle="collapse"
+				data-bs-target="#demo">인자 현황</button>
+	
+			<div id="demo" class="collapse">
+	
+				<table class="table table-striped">
+					<tr>
+						<th style="width: 150px;">총 인원 수</th>
+						<td th:text="${pageVO.listCount}"></td>
+						<th style="width: 150px;">이전 페이지</th>
+						<td th:text="${pageVO.prePage}"></td>
+						<th style="width: 150px;">현재 페이지</th>
+						<td th:text="${pageVO.currPage}"></td>
+						<th style="width: 150px;">이후 페이지</th>
+						<td th:text="${pageVO.nextPage}"></td>
+						<th style="width: 150px;">처음 페이지</th>
+						<td th:text="${pageVO.startPage}"></td>
+						<th style="width: 150px;">마지막 페이지</th>
+						<td th:text="${pageVO.endPage}"></td>
+					</tr>
+					<tr th:each="member, st : ${members}">
+						<th colspan="1">회원 정보</th>
+						<td colspan="11"><span th:text="${member}"></span><br></td>
+					</tr>
+				</table>
+			</div>
+	
+			<h2 class="d-flex justify-content-center m-5">회원 관리</h2>
+	
+			<table class="table mx-2 mx-auto" style="width: 95vw">
+				<thead>
+					<tr>
+						<th>번호</th>
+						<th>아이디</th>
+						<th>이름</th>
+						<th>성별</th>
+						<th>이메일</th>
+						<th>휴대폰</th>
+						<th>집전화</th>
+						<th>우편번호</th>
+						<th>기본주소(도로명)</th>
+						<th>상세주소</th>
+						<th>생일</th>
+						<th>가입일</th>
+						<th>활동여부</th>
+						<th>메뉴</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:if="${not #lists.isEmpty(members) && pageVO.listCount > 0}"
+						th:each="member, st : ${members}">
+						<td th:text="${st.count + (pageVO.currPage - 1) * 10}"></td>
+						<td th:utext="${member.id}"></td>
+						<td th:utext="${member.name}"></td>
+						<td th:utext="${member.gender == 'm' ? '남' : '여'}"></td>
+						<td th:utext="${member.email}"></td>
+						<td th:utext="${member.mobile}"></td>
+						<td th:utext="${member.phone}"></td>
+						<td th:utext="${member.zip}"></td>
+						<td th:utext="${member.address1}"></td>
+						<td th:utext="${member.address2}"></td>
+						<td th:utext="${#dates.format(member.birthday, 'yyyy년 MM월 dd일')}"></td>
+						<td
+							th:utext="${#dates.format(member.joindate, 'yyyy년 MM월 dd일 HH:mm:ss')}"></td>
+						<td th:utext="${member.enabled == '1' ? '활동' : '휴면'}"></td>
+						<td>
+							<button class="btn btn-primary"
+								id="${'update_btn' + (st.count + (pageVO.currPage - 1) * 10)}">수정</button>&nbsp;
+							<button class="btn btn-primary"
+								id="${'delete_btn' + (st.count + (pageVO.currPage - 1) * 10)}">삭제</button>
+						</td>
+					</tr>
+					<tr th:if="${#lists.isEmpty(members) && pageVO.listCount == 0}">
+						<td colspan="14">회원 정보 없음</td>
+					</tr>
+				</tbody>
+	
+			</table>
+	
+			<!-- 페이징 -->
+			<div class="d-flex justify-content-center mt-4">
+				<nav aria-label="Page navigation example">
+					<ul class="pagination">
+	
+						<!--  첫 페이지 -->
+						<li class="page-item"><a class="page-link"
+							th:href="@{/admin/viewAll.do?currPage=1}" aria-label="Start">
+								<span aria-hidden="true">&Lt;</span>
+						</a></li>
+	
+						<!-- 이전 페이지 -->
+						<li class="page-item">
+							<!-- <a class="page-link" th:href="@{'/admin/viewAll.do?currPage='+${pageVO.currPage-1 < 1 ? 1 : pageVO.currPage-1}}" aria-label="Previous"> -->
+							<a class="page-link"
+							th:href="@{'/admin/viewAll.do?currPage='+${pageVO.prePage}}"
+							aria-label="Previous"> <span aria-hidden="true">&lt;</span>
+						</a>
+						</li>
+	
+						<!-- 현재 페이지 -->
+						<li class="page-item active"><a class="page-link"
+							th:href="@{'/admin/viewAll.do?currPage='+${pageVO.currPage}}"
+							th:utext="${pageVO.currPage}"></a></li>
+	
+						<!-- <li class="page-item"><a class="page-link" href="#">2</a></li>
+			    <li class="page-item"><a class="page-link" href="#">3</a></li> -->
+	
+						<!-- 다음 페이지 -->
+						<li class="page-item">
+							<!-- <a class="page-link" th:href="@{'/admin/viewAll.do?currPage='+${pageVO.currPage+1 > pageVO.endPage ? pageVO.endPage : pageVO.currPage+1}}" aria-label="Next"> -->
+							<a class="page-link"
+							th:href="@{'/admin/viewAll.do?currPage='+${pageVO.nextPage}}"
+							aria-label="Next"> <span aria-hidden="true">&gt;</span>
+						</a>
+						</li>
+	
+						<!-- 마지막 페이지 -->
+						<li class="page-item"><a class="page-link"
+							th:href="@{'/admin/viewAll.do?currPage='+${pageVO.endPage}}"
+							aria-label="End"> <span aria-hidden="true">&Gt;</span>
+						</a></li>
+					</ul>
+				</nav>
+			</div>
+			<!--// 페이징 -->
+			
+		</div>
+		<!--// content -->	
+		
+	</div>
+	<!--// layout -->	
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko-kr">
+<head>
+<meta charset="UTF-8">
+<title>에러 페이지</title>
+	<script th:inline="javascript" th:if="${errMsg != null}" charset="UTF-8">		
+		alert([[${errMsg}]]);
+		// location.href="../";
+		// location.href="/memberProject/";		
+		// location.href=[[${#request.getContextPath() + "/"}]];
+		<!-- 10.11 추가 -->
+		location.href=[[${#request.getContextPath()} + ${movePage}]];
+	</script>
+</head>
+<body>
+</body>
+</html>

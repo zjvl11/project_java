@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}"
+	lang="ko-kr">
+<head>
+<meta charset="UTF-8">
+<title>관리자 화면</title>
+
+<!-- bootstrap -->
+<link rel="stylesheet"
+	th:href="@{/bootstrap/5.3.1/css/bootstrap.min.css}" />
+<script th:src="@{/bootstrap/5.3.1/js/bootstrap.min.js}" charset="UTF-8"></script>
+
+<!-- bootstrap icons :  -->
+<link rel="stylesheet" th:href="@{/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css}">
+
+<!-- 10.23 -->
+<script>
+window.onload = (e) => {
+	
+	// 게시글의 체크 박스들 전체 선택용 "체크 박스(최상단)" 이벤트 처리
+	let checkboxes = document.querySelectorAll("[id^=check_]"); // 체크 박스들
+	let mainCheckbox = checkboxes[0];
+	
+	mainCheckbox.onclick = (e) => {
+		
+		// 메인 체크 박스 상태 파악 : 체크 여부
+		console.log("메인 체크박스 체크 여부 : ", mainCheckbox.checked);
+				
+ 		for (check of checkboxes) {
+			check.checked = mainCheckbox.checked; // 메인 체크 박스의 상태를 그대로 다른 체크박스들에도 반영
+		} //
+		
+	} //
+	
+	// 삭제 버튼을 눌렀을 경우 
+	let boardDeletebtn = document.getElementById("board_delete_btn");
+	
+	let deleteExpectedBoardIds = new Array(); // 삭제할 아이디 정보를 담을 배열
+	
+	console.log("boardDeletebtn : ", boardDeletebtn);
+	
+	// 관리자 모드일 경우만 나오는 버튼이므로 일반 모드에는 에러로 오인됨 (추후 처리)
+	boardDeletebtn.onclick = () => {
+		
+		// 체크 박스들 중에서 체크된 체크박스(삭제할 게시글들) 아이디 파악 
+		// 메인 체크 박스(i=0)는 제외 : 개별체크 박스(i=1부터 시작)에서 삭제할 게시글 아이디 추출		
+		for (let i=1; i<checkboxes.length-1; i++) {
+			
+			if (checkboxes[i].checked == true) {
+				
+				let boardNum = checkboxes[i].id.substring('check_'.length)
+				deleteExpectedBoardIds.push(boardNum) // 삭제할 아이디 배열에 등록(적재)
+				// console.log("삭제할 게시글 아이디 :", boardNum);
+				
+			} //
+		} //
+		
+		// 삭제할 게시글 아이디들 확인
+		for (deleteExpectedBoardId of deleteExpectedBoardIds) {
+			
+			console.log("삭제할(선택된) 게시글 아이디 : ", deleteExpectedBoardId);
+		} // for
+		
+	} //
+	
+} //
+</script>
+</head>
+<body>
+
+	<!-- layout -->
+	<div layout:fragment="content" class="main_sect_pnl">
+	
+		<div class="content_sect_pnl">
+
+			<!-- 
+				인자 현황판 (collapse) 
+				: https://getbootstrap.com/docs/5.3/components/collapse/ 
+			-->
+			<div id="demo" class="collapse">
+	
+				<table class="table table-striped">
+					<tr>
+						<th style="width: 150px;">총 게시글 수</th>
+						<td th:text="${pageVO.listCount}"></td>
+						<th style="width: 150px;">이전 페이지</th>
+						<td th:text="${pageVO.prePage}"></td>
+						<th style="width: 150px;">현재 페이지</th>
+						<td th:text="${pageVO.currPage}"></td>
+						<th style="width: 150px;">이후 페이지</th>
+						<td th:text="${pageVO.nextPage}"></td>
+						<th style="width: 150px;">처음 페이지</th>
+						<td th:text="${pageVO.startPage}"></td>
+						<th style="width: 150px;">마지막 페이지</th>
+						<td th:text="${pageVO.endPage}"></td>
+					</tr>
+					<tr th:each="board, st : ${boardList}">
+						<th colspan="1">게시글 정보</th>
+						<td colspan="11"><span th:text="${board}"></span><br></td>
+					</tr>
+				</table>
+			</div>
+			
+			<h2 class="d-flex justify-content-center m-5">
+				게시글 목록
+				&nbsp;<button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#demo">인자 현황</button>
+			</h2>
+	
+			<table class="table mx-2 mx-auto" style="width:50vw">
+				<thead>
+					<tr>
+						<th>
+							<input type="checkbox" th:id="${'check_'+ pageVO.currPage}" th:name="${'check_'+ pageVO.currPage}">
+						</th>
+						<th>번호</th>
+						<th>아이디</th>
+						<th>제목</th>
+						<th>작성일</th>
+						
+						<!-- 10.30 (2) : 조회수 추가 -->
+						<th>조회수</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:if="${not #lists.isEmpty(boardList) && pageVO.listCount > 0}"
+						th:each="board, st : ${boardList}">
+						<td>
+							<input type="checkbox" th:id="${'check_'+ board.boardNum}" th:name="${'check_'+ board.boardNum}">
+						</td>
+						<td th:text="${st.count + (pageVO.currPage - 1) * 10}"></td>
+						<td th:utext="${board.boardNum}"></td>
+						<td>
+							<a th:href="@{'/board/view.do/'+ ${board.boardNum}}" th:utext="${board.boardSubject}"></a>
+							<!-- 글 내용 중 삽입 이미지 존재 여부 -->
+							<span th:if="${#strings.contains(board.boardContent, 'img')}">
+								<i class="bi bi-card-image"></i>
+							</span>
+														
+							<!-- 업로드 파일 존재 여부 -->
+							<span th:if="${!#strings.isEmpty(board.boardFile)}">
+								<i class="bi bi-paperclip"></i>
+							</span>
+						</td>
+						<td th:utext="${#dates.format(board.boardDate, 'yyyy-MM-dd HH:mm:ss')}"></td>
+						
+						<!-- 10.30 (2) : 조회수 추가 -->
+						<td th:utext="${board.boardReadCount}"></td>
+					</tr>
+				</tbody>
+	
+			</table>
+			
+			<!-- 10.23 -->
+			<!-- 게시판 메뉴 :
+		         ex) 관리자 모드 : 체크박스 제어에 따른 관리자 모드에서의 메뉴(삭제 등). 관리자 등급이어야 표기됨		         
+			-->
+			<div id="board_menu" class="mx-auto d-flex justify-content-end mt-4" style="width:45vw">
+				 
+				 <!-- 현재 삭제 버튼의 이벤트 처리를 없습니다. 추후 필요시 처리할 수 있습니다. -->
+				 <a href="#" id="board_delete_btn" class="btn btn-primary me-2" 
+				 	sec:authorize="hasRole('ROLE_ADMIN')">삭제</a>
+				 
+				 <a th:href="@{/board/write.do}" class="btn btn-primary me-2" 
+				 	sec:authorize="isAuthenticated()">
+				 	<i class="bi bi-pen"></i> 글쓰기
+			 	 </a>	
+			 	 
+			 	 <!-- 10.24 : 게시글 목록 -->
+			 	 <a class="btn btn-primary" th:href="@{/board/list.do}">
+					게시글 목록
+				 </a>			
+			</div>
+	
+			<!-- 페이징 -->
+			<!-- 검색이 아닌 경우 -->	
+			<div class="d-flex justify-content-center mt-4" th:if="${#strings.isEmpty(searchKey)}">
+				<nav aria-label="Page navigation example">
+					<ul class="pagination">
+	
+						<!--  첫 페이지 -->
+						<li class="page-item"><a class="page-link"
+							th:href="@{/board/list.do?currPage=1}" aria-label="Start">
+								<span aria-hidden="true">&Lt;</span>
+						</a></li>
+	
+						<!-- 이전 페이지 -->
+						<li class="page-item">
+							<!-- <a class="page-link" th:href="@{'/board/list.do?currPage='+${pageVO.currPage-1 < 1 ? 1 : pageVO.currPage-1}}" aria-label="Previous"> -->
+							<a class="page-link"
+							th:href="@{'/board/list.do?currPage='+${pageVO.prePage}}"
+							aria-label="Previous"> <span aria-hidden="true">&lt;</span>
+						</a>
+						</li>
+	
+						<!-- 현재 페이지 -->
+						<li class="page-item active"><a class="page-link"
+							th:href="@{'/board/list.do?currPage='+${pageVO.currPage}}"
+							th:utext="${pageVO.currPage}"></a></li>
+	
+						<!-- 다음 페이지 -->
+						<li class="page-item">
+							<!-- <a class="page-link" th:href="@{'/board/list.do?currPage='+${pageVO.currPage+1 > pageVO.endPage ? pageVO.endPage : pageVO.currPage+1}}" aria-label="Next"> -->
+							<a class="page-link"
+							th:href="@{'/board/list.do?currPage='+${pageVO.nextPage}}"
+							aria-label="Next"> <span aria-hidden="true">&gt;</span>
+						</a>
+						</li>
+	
+						<!-- 마지막 페이지 -->
+						<li class="page-item"><a class="page-link"
+							th:href="@{'/board/list.do?currPage='+${pageVO.endPage}}"
+							aria-label="End"> <span aria-hidden="true">&Gt;</span>
+						</a></li>
+					</ul>
+				</nav>
+			</div>
+			<!--// 검색이 아닌 경우 -->
+			
+			<!-- 검색인 경우 -->	
+			<div class="d-flex justify-content-center mt-4" th:if="${!#strings.isEmpty(searchKey)}">
+				<nav aria-label="Page navigation example">
+				  <ul class="pagination">
+				    
+				    <!--  첫 페이지 -->
+				    <li class="page-item">
+				      <a class="page-link" 
+				      	 th:href="@{'/board/searchList.do?currPage=1&searchKey='+${searchKey}+'&searchWord='+${searchWord}}" aria-label="Start">
+				        <span aria-hidden="true">&Lt;</span>
+				      </a>
+				    </li>
+				    
+				    <!-- 이전 페이지 -->
+				    <li class="page-item">
+				      <a class="page-link" th:href="@{'/board/searchList.do?currPage='+${pageVO.prePage}+'&searchKey='+${searchKey}+'&searchWord='+${searchWord}}" aria-label="Previous">
+				        <span aria-hidden="true">&lt;</span>
+				      </a>
+				    </li>
+				    
+				    <!-- 현재 페이지 -->
+				    <li class="page-item active">
+				    	<a class="page-link" th:href="@{'/board/searchList.do?currPage='+${pageVO.currPage}+'&searchKey='+${searchKey}+'&searchWord='+${searchWord}}" th:utext="${pageVO.currPage}"></a>
+			    	</li>
+				    
+				    <!-- 다음 페이지 -->
+				    <li class="page-item">
+				      <a class="page-link" th:href="@{'/board/searchList.do?currPage='+${pageVO.nextPage}+'&searchKey='+${searchKey}+'&searchWord='+${searchWord}}" aria-label="Next">
+				        <span aria-hidden="true">&gt;</span>
+				      </a>
+				    </li>
+				    
+				    <!-- 마지막 페이지 -->
+				    <li class="page-item">
+				      <a class="page-link" th:href="@{'/board/searchList.do?currPage='+${pageVO.endPage}+'&searchKey='+${searchKey}+'&searchWord='+${searchWord}}" aria-label="End">
+				        <span aria-hidden="true">&Gt;</span>
+				      </a>
+				    </li>
+				  </ul>
+				</nav>
+			</div>	
+			<!--// 검색인 경우 -->	
+			<!--// 페이징 -->
+			
+			<!-- 10.24 -->
+			<!-- 검색 -->
+			<!-- 간격 : mt-2 mb-5, 줄 단위 배치 : row, 레이아웃 배분 비율 : ex) col-3 (3/12) -->
+			<form th:action="@{/board/searchList.do}" method="get">
+			
+				<div id="search_pnl" class="mx-auto row mt-2 mb-5" style="width:50vw">
+				
+					<!-- 10.24 : 게시글 목록 이동에 따른 조치 : 빈 영역 -->
+					<div class="col-3">
+					</div>
+					
+					<div id="select_pnl" class="col-2 pe-0">
+						<select class="form-select" id="searchKey" name="searchKey" aria-label="검색 구분">
+						  <option selected value="board_subject">글제목</option>
+						  <option value="board_content">내용</option>
+						  <option value="board_writer">작성자</option>
+						</select>
+					</div>
+					
+					<div id="search_pnl" class="col-4">
+					
+						<input type="text" class="form-control" id="searchWord" name="searchWord" />
+					</div>
+					
+					<div id="search_btn_pnl" class="col-1 ps-0">
+						<button id="search_btn" class="btn btn-primary">
+							<!-- bootstrap icon
+							     : https://icons.getbootstrap.com/icons/search/  -->
+							<i class="bi bi-search"></i>
+						</button>
+					
+					</div>
+					
+					<!-- 10.24 : 글쓰기 옆으로 이동 -->
+					<!-- <div id="list_btn_pnl" class="col-3 ps-0">
+						<a class="btn btn-primary" th:href="@{/board/list.do}">
+							게시글 목록
+						</a>
+					</div> -->
+				</div>
+				
+			</form>
+			<!--// 검색 -->
+			
+		</div>
+		<!--// content -->	
+		
+	</div>
+	<!--// layout -->	
+</body>
+</html>
